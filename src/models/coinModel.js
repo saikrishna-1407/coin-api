@@ -1,29 +1,51 @@
-const pool = require('../config/db');
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = require('../config/database'); // Ensure correct DB connection
 
+const Coin = sequelize.define("Coin", {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    symbol: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    price: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    }
+}, {
+    tableName: "coins", // Ensure lowercase table name
+    timestamps: true // Automatically handle createdAt & updatedAt
+});
+
+// Fetch all coins
 const getAllCoins = async () => {
-    const result = await pool.query('SELECT * FROM coins');
-    return result.rows;
+    return await Coin.findAll();
 };
 
+// Add a new coin
 const addCoin = async (name, symbol, price) => {
-    const result = await pool.query(
-        'INSERT INTO coins (name, symbol, price) VALUES ($1, $2, $3) RETURNING *',
-        [name, symbol, price]
-    );
-    return result.rows[0];
+    const newCoin = await Coin.create({ name, symbol, price });
+    console.log("✅ Coin inserted into DB:", newCoin.toJSON()); // Debugging log
+    return newCoin;
 };
 
+// Update a coin's price
 const updateCoin = async (id, price) => {
-    const result = await pool.query(
-        'UPDATE coins SET price = $1 WHERE id = $2 RETURNING *',
-        [price, id]
-    );
-    return result.rows[0];
+    await Coin.update({ price }, { where: { id } });
+    return await Coin.findByPk(id);
 };
 
+// Delete a coin
 const deleteCoin = async (id) => {
-    await pool.query('DELETE FROM coins WHERE id = $1', [id]);
-    return { message: 'Coin deleted successfully' };
+    await Coin.destroy({ where: { id } });
+    return { message: '✅ Coin deleted successfully' };
 };
 
 module.exports = { getAllCoins, addCoin, updateCoin, deleteCoin };

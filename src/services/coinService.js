@@ -6,16 +6,12 @@ const getCoins = async () => {
 
 const addCoin = async (data) => {
     const { name, symbol, price } = data;
-    if (!name || !symbol || !price) {
-        throw new Error("❌ All fields are required!");
-    }
+    if (!name || !symbol || !price) throw new Error("❌ All fields are required!");
     return await coinModel.addCoin(name, symbol, price);
 };
 
 const updateCoin = async (id, data) => {
-    if (!data.price) {
-        throw new Error("❌ Price is required for update!");
-    }
+    if (!data.price) throw new Error("❌ Price is required for update!");
     return await coinModel.updateCoin(id, data.price);
 };
 
